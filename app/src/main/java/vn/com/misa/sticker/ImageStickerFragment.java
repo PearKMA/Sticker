@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import vn.com.misa.sticker.child_fragment.ListFragmentPagerAdapter;
+
 public class ImageStickerFragment extends Fragment {
     //UI
     ImageView btnOk;

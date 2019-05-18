@@ -1,4 +1,4 @@
-package vn.com.misa.sticker;
+package vn.com.misa.sticker.child_fragment;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -11,6 +11,10 @@ import vn.com.misa.sticker.child_fragment.FishFragment;
 import vn.com.misa.sticker.child_fragment.FruitFragment;
 import vn.com.misa.sticker.child_fragment.LoveFragment;
 
+/**
+ * create by lvhung on 5/18/2019
+ * class này dùng để quản lý các tab sticker trong viewpager
+ */
 public class ListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     public ListFragmentPagerAdapter(FragmentManager fm) {

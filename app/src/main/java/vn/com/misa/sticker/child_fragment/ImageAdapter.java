@@ -18,6 +18,9 @@ import java.util.List;
 import vn.com.misa.sticker.ImageStickerFragment;
 import vn.com.misa.sticker.R;
 
+/**
+ * adapter hiển thị list item image trong recycler view
+ */
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder>{
     int selected_position=-1;
     private Fragment context;
@@ -40,14 +43,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        if (!firstItem.equals(list.get(0))){
-            selected_position=0;
-            firstItem=list.get(0);
+        if (!firstItem.equals(list.get(0))){    //Nếu item đầu tiên khác với item trước đó
+            selected_position=0;                //reset lựa chọn
+            firstItem=list.get(0);              //set item nhận dạng
         }
         if (height != 0) {
             viewHolder.layout.setLayoutParams(new FrameLayout.LayoutParams(height,height));
             if (selected_position==i){
-                viewHolder.item.setBackgroundResource(R.drawable.circle_shape_button_pressed);
+                viewHolder.item.setBackgroundResource(R.drawable.circle_shape_button_pressed);  //set background nếu item đc chọn
             }else {
                 viewHolder.item.setBackground(null);
             }
@@ -84,7 +87,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder>{
 
             ImageStickerFragment fragment= (ImageStickerFragment)context;
             if (fragment!=null&&fragment.isVisible()){
-                fragment.OnImageSelected(list.get(selected_position));
+                fragment.OnImageSelected(list.get(selected_position));          //gửi path image đến fragment chính
             }
 
         }
