@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="#464547"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+
+            <vn.com.misa.sticker.duration.RangeSeekBar
+                android:id="@+id/rangeSBSetTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleY="-1"
+                />
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:progress="0"
+                android:progressDrawable="@android:color/transparent"
+                android:layout_marginTop="20dp"
+                android:thumbTint="#DB4F7A"
+                android:id="@+id/progressVid"/>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/txtDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:layout_weight="4"
+            android:layout_marginTop="16dp"
+            android:text="00:24s" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:background="@drawable/rounded_layout"
+        android:layout_margin="16dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:adjustViewBounds="true"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            app:srcCompat="@drawable/ic_sticker_edit_screen" />
+    </FrameLayout>
+</LinearLayout>

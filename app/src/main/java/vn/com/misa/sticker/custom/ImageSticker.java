@@ -2,30 +2,27 @@ package vn.com.misa.sticker.custom;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import vn.com.misa.sticker.ImageStickerListener;
 import vn.com.misa.sticker.R;
 
-public class CustomView extends FrameLayout implements View.OnClickListener {
+public class ImageSticker extends FrameLayout implements View.OnClickListener {
     private ImageView btnFlip, btnRemove, btnScale;
     private SquareImageView ivMain;
     private FrameLayout flContainer;
     long startTime = 0;
     long endTime = 0;
-
     //move
     // For scalling
     private float this_orgX = -1, this_orgY = -1;
@@ -38,20 +35,27 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
     private double centerX, centerY;
     private final static int SELF_SIZE_DP = 100;
 
+    //interface communication from view to fragment
+    private ImageStickerListener mCallback;
+
     //
-    public CustomView(@NonNull Context context) {
+    public ImageSticker(@NonNull Context context) {
         super(context);
         init(context);
     }
 
-    public CustomView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ImageSticker(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public CustomView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ImageSticker(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
+    }
+
+    public void setCallback(ImageStickerListener callback) {
+        mCallback = callback;
     }
 
     private void init(Context context) {
@@ -76,8 +80,8 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
                         case MotionEvent.ACTION_MOVE:
                             float offsetX = event.getRawX() - move_orgX;
                             float offsetY = event.getRawY() - move_orgY;
-                            CustomView.this.setX(CustomView.this.getX() + offsetX);
-                            CustomView.this.setY(CustomView.this.getY() + offsetY);
+                            ImageSticker.this.setX(ImageSticker.this.getX() + offsetX);
+                            ImageSticker.this.setY(ImageSticker.this.getY() + offsetY);
                             move_orgX = event.getRawX();
                             move_orgY = event.getRawY();
                             break;
@@ -101,17 +105,17 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
-                            this_orgX = CustomView.this.getX();
-                            this_orgY = CustomView.this.getY();
+                            this_orgX = ImageSticker.this.getX();
+                            this_orgY = ImageSticker.this.getY();
                             scale_orgX = event.getRawX();
                             scale_orgY = event.getRawY();
-                            scale_orgWidth = CustomView.this.getLayoutParams().width;
-                            scale_orgHeight = CustomView.this.getLayoutParams().height;
+                            scale_orgWidth = ImageSticker.this.getLayoutParams().width;
+                            scale_orgHeight = ImageSticker.this.getLayoutParams().height;
                             rotate_orgX = event.getRawX();
                             rotate_orgY = event.getRawY();
-                            centerX = CustomView.this.getX() +
-                                    ((View) CustomView.this.getParent()).getX() +
-                                    (float) CustomView.this.getWidth() / 2;
+                            centerX = ImageSticker.this.getX() +
+                                    ((View) ImageSticker.this.getParent()).getX() +
+                                    (float) ImageSticker.this.getWidth() / 2;
                             //double statusBarHeight = Math.ceil(25 * getContext().getResources().getDisplayMetrics().density);
                             int result = 0;
                             int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -119,10 +123,10 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
                                 result = getResources().getDimensionPixelSize(resourceId);
                             }
                             double statusBarHeight = result;
-                            centerY = CustomView.this.getY() +
-                                    ((View) CustomView.this.getParent()).getY() +
+                            centerY = ImageSticker.this.getY() +
+                                    ((View) ImageSticker.this.getParent()).getY() +
                                     statusBarHeight +
-                                    (float) CustomView.this.getHeight() / 2;
+                                    (float) ImageSticker.this.getHeight() / 2;
 //                        startTime = event.getEventTime();
                             break;
                         case MotionEvent.ACTION_MOVE:
@@ -142,19 +146,19 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
                                 double offsetY = Math.abs(event.getRawY() - scale_orgY);
                                 double offset = Math.max(offsetX, offsetY);
                                 offset = Math.round(offset);
-                                CustomView.this.getLayoutParams().width += offset;
-                                CustomView.this.getLayoutParams().height += offset;
+                                ImageSticker.this.getLayoutParams().width += offset;
+                                ImageSticker.this.getLayoutParams().height += offset;
                             } else if (length2 < length1
                                     && (angle_diff < 25 || Math.abs(angle_diff - 180) < 25)
-                                    && CustomView.this.getLayoutParams().width > size / 2
-                                    && CustomView.this.getLayoutParams().height > size / 2) {
+                                    && ImageSticker.this.getLayoutParams().width > size / 2
+                                    && ImageSticker.this.getLayoutParams().height > size / 2) {
                                 //scale down
                                 double offsetX = Math.abs(event.getRawX() - scale_orgX);
                                 double offsetY = Math.abs(event.getRawY() - scale_orgY);
                                 double offset = Math.max(offsetX, offsetY);
                                 offset = Math.round(offset);
-                                CustomView.this.getLayoutParams().width -= offset;
-                                CustomView.this.getLayoutParams().height -= offset;
+                                ImageSticker.this.getLayoutParams().width -= offset;
+                                ImageSticker.this.getLayoutParams().height -= offset;
                             }
                             //rotate
                             double angle = Math.atan2(event.getRawY() - centerY, event.getRawX() - centerX) * 180 / Math.PI;
@@ -181,11 +185,26 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
             e.printStackTrace();
         }
     }
+    public float getYMain(){
+        return this.ivMain.getY();
+    }
+    public float getXMain(){
+        return this.ivMain.getX();
+    }
 
-    public void setDrawable(Drawable drawable){
+    public float getAngle() {
+        return this.ivMain.getRotation();
+    }
+
+    public float getSizeSticker() {
+        return this.ivMain.getWidth();
+    }
+
+    public void setDrawable(Drawable drawable) {
         this.ivMain.setImageDrawable(drawable);
     }
-    public void setResource(int id){
+
+    public void setResource(int id) {
         this.ivMain.setImageResource(id);
     }
 
@@ -229,6 +248,8 @@ public class CustomView extends FrameLayout implements View.OnClickListener {
             case R.id.btnRemove:
                 if (this.getParent() != null) {
                     ((ViewGroup) this.getParent()).removeView(this);
+                    if (mCallback != null)
+                        mCallback.onRemove(this);
                 }
                 break;
         }
