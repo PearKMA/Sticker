@@ -314,7 +314,6 @@ public class ImageStickerFragment extends Fragment implements ImageStickerListen
         }
     }
 
-//file:///android_asset/animal/anc.daf
     private String copyFileAssets(String path){
         boolean kt=false;
         String fileName="";

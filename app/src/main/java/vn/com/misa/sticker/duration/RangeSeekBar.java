@@ -599,7 +599,7 @@ public class RangeSeekBar<T extends Number> extends ImageView {
     /**
      * Converts a normalized value to a Number object in the value space between absolute minimum and maximum.
      *
-     * @param normalized
+     * @param normalized size
      * @return
      */
     @SuppressWarnings("unchecked")
