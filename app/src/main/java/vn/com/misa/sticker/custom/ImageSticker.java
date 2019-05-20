@@ -23,6 +23,7 @@ public class ImageSticker extends FrameLayout implements View.OnClickListener {
     private FrameLayout flContainer;
     long startTime = 0;
     long endTime = 0;
+    float mAngle;
     //move
     // For scalling
     private float this_orgX = -1, this_orgY = -1;
@@ -164,6 +165,7 @@ public class ImageSticker extends FrameLayout implements View.OnClickListener {
                             double angle = Math.atan2(event.getRawY() - centerY, event.getRawX() - centerX) * 180 / Math.PI;
                             //setRotation((float) angle - 45);
                             setRotation((float) angle - 45);
+                            mAngle=(float) angle - 45;
                             rotate_orgX = rotate_newX;
                             rotate_orgY = rotate_newY;
                             scale_orgX = event.getRawX();
@@ -193,7 +195,7 @@ public class ImageSticker extends FrameLayout implements View.OnClickListener {
     }
 
     public float getAngle() {
-        return this.ivMain.getRotation();
+        return mAngle;
     }
 
     public float getSizeSticker() {

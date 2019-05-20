@@ -2,11 +2,13 @@ package vn.com.misa.sticker;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -31,6 +33,11 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import vn.com.misa.sticker.child_fragment.ListFragmentPagerAdapter;
@@ -50,8 +57,9 @@ public class ImageStickerFragment extends Fragment implements ImageStickerListen
     private MediaController mediaController;
     //common
     private ArrayList<ImageStickerModel> listSticker;
-    private float lastFrom = 0, lastTo = 0;
+    private float lastFrom = 0, lastTo = 10;
     private String path,output="/storage/emulated/0/CPR/Video/test1.mp4";
+    final static String FOLDER = "/storage/emulated/0/CPR/Video/";
 
     public static ImageStickerFragment newInstance(String path) {
         Bundle args = new Bundle();
@@ -164,6 +172,9 @@ public class ImageStickerFragment extends Fragment implements ImageStickerListen
                                     llListSticker.setVisibility(View.GONE);
                                     getChildFragmentManager().beginTransaction().add(R.id.containerChildFrag,
                                             ChildFragmentDuration.newInstance(), "duration").commit();
+                                    for (ImageStickerModel item:listSticker){
+                                        item.getmImage().setControlHidden(true);
+                                    }
                                 }
                             });
                 } else if (getChildFragmentManager().findFragmentByTag("duration") != null &&
@@ -175,32 +186,47 @@ public class ImageStickerFragment extends Fragment implements ImageStickerListen
     }
 
     private void createCommand() {
-        if (path != null && !path.isEmpty()) {
-            StringBuilder cmd = new StringBuilder("-y -i " + path);
-            for (ImageStickerModel item : listSticker) {
-                cmd.append(" -i " + item.getPath());
-            }
-            cmd.append(" -filter_complex ");
-            for (int i = 1; i <= listSticker.size(); i++) {
-                int size = (int) listSticker.get(i).getmImage().getSizeSticker();
-                float angle = listSticker.get(i).getmImage().getAngle();
-                cmd.append("[" + i + ":v]scale=" + size + ":" + size + ",pad=iw+4:ih+4:black@0[s" + i + "];");
-                cmd.append("[s" + i + "]rotate=" + angle + "*PI/180:c=none::ow='rotw(" + angle + "*PI/180)':oh='roth(" + angle + "*PI/180)'[r" + i + "];");
-            }
-            float x=listSticker.get(0).getmImage().getX()+listSticker.get(0).getmImage().getXMain();
-            float y=listSticker.get(0).getmImage().getY()+listSticker.get(0).getmImage().getYMain();
-            cmd.append("[0:v][r1]overlay="+x+":"+y+":enable='between(t,"+lastFrom+","+lastTo+")'[v1];");
-            if (listSticker.size()>1) {
-                for (int i = 1; i <= listSticker.size(); i++) {
-                    float x1 = listSticker.get(i).getmImage().getX() + listSticker.get(i).getmImage().getXMain();
-                    float y1 = listSticker.get(i).getmImage().getY() + listSticker.get(i).getmImage().getYMain();
-                    cmd.append("[v" + i + "][r"+(i+1)+"]overlay=" + x1 + ":" + y1 + ":enable='between(t,"+lastFrom+","+lastTo+")'[v"+(i+1)+"];");
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                boolean kt=false;
+                if (path != null && !path.isEmpty()) {
+                    StringBuilder cmd = new StringBuilder("-y -i " + path);
+                    for (ImageStickerModel item : listSticker) {
+                        if (!copyFileAssets(item.getPath()).equals("")) {
+                            cmd.append(" -i " + copyFileAssets(item.getPath()));
+                            kt=true;
+                        }else {
+                            kt=false;
+                        }
+                    }
+                    cmd.append(" -filter_complex ");
+                    for (int i = 1; i <= listSticker.size(); i++) {
+                        int size = (int) listSticker.get((i-1)).getmImage().getSizeSticker();
+                        float angle = listSticker.get(i-1).getmImage().getAngle();
+                        cmd.append("[" + i + ":v]scale=" + size + ":" + size + ",pad=iw+4:ih+4:black@0[s" + i + "];");
+                        cmd.append("[s" + i + "]rotate=" + angle + "*PI/180:c=none::ow='rotw(" + angle + "*PI/180)':oh='roth(" + angle + "*PI/180)'[r" + i + "];");
+                    }
+                    float x=listSticker.get(0).getmImage().getX()+listSticker.get(0).getmImage().getXMain();
+                    float y=listSticker.get(0).getmImage().getY()+listSticker.get(0).getmImage().getYMain();
+                    cmd.append("[0:v][r1]overlay="+x+":"+y+":enable='between(t,"+lastFrom+","+lastTo+")'[v1];");
+                    if (listSticker.size()>1) {
+                        for (int i = 1; i < listSticker.size(); i++) {
+                            float x1 = listSticker.get(i).getmImage().getX() + listSticker.get(i).getmImage().getXMain();
+                            float y1 = listSticker.get(i).getmImage().getY() + listSticker.get(i).getmImage().getYMain();
+                            cmd.append("[v" + i + "][r"+(i+1)+"]overlay=" + x1 + ":" + y1 + ":enable='between(t,"+lastFrom+","+lastTo+")'[v"+(i+1)+"];");
+                        }
+                        cmd.append(" -map [v"+listSticker.size()+"] -codec:a copy "+output);
+                    }else {
+                        cmd.append(" -map [v1] -codec:a copy "+output);
+                    }
+                    if (kt) Log.e("TAG", "run: OK" );
+                    Log.e("TAG", "run: "+cmd.toString() );
                 }
-                cmd.append(" -map [v"+listSticker.size()+"] -codec:a copy "+output);
-            }else {
-                cmd.append(" -map [v1] -codec:a copy "+output);
             }
-        }
+        });
+
     }
 
 
@@ -288,5 +314,53 @@ public class ImageStickerFragment extends Fragment implements ImageStickerListen
         }
     }
 
+//file:///android_asset/animal/anc.daf
+    private String copyFileAssets(String path){
+        boolean kt=false;
+        String fileName="";
+        File dir=new File(FOLDER);
+        if (!dir.exists()){
+            dir.mkdirs();
+        }
+        AssetManager assetManager=getActivity().getAssets();
+        InputStream in = null;
+        OutputStream out = null;
+        try{
+            fileName = path.substring(path.lastIndexOf("/"));
+            in=assetManager.open(path.substring(22));
+            File outFile=new File(FOLDER,fileName);
+            out=new FileOutputStream(outFile);
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer))!=-1){
+                out.write(buffer,0,read);
+            }
+            kt=true;
+        }catch(IOException e){
+            e.printStackTrace();
+            kt = false;
+        }finally {
+            if (in!=null){
+                try{
+                    in.close();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if (out!=null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (kt){
+            return "/storage/emulated/0/CPR/Video"+fileName;
+        }
+        else {
+            return "";
+        }
+    }
 
 }

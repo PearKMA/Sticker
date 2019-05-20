@@ -80,6 +80,7 @@ public class ChildFragmentDuration extends Fragment {
             rangeSeekBar.setSelectedMinValue(0.0f);
             rangeSeekBar.setSelectedMaxValue((float) totalSeconds);
         }
+        sendValueToParentFrag(rangeSeekBar.getSelectedMinValue(),rangeSeekBar.getSelectedMaxValue());
         count= new CountDownTimer(totalSeconds,
                 1000) {
 
